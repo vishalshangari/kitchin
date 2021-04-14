@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Heading, Box, Flex } from '@chakra-ui/react';
+import { UserContext } from '../App';
+import axios from 'axios';
 import {
   Menu,
   MenuButton,
@@ -12,6 +14,15 @@ import {
 } from '@chakra-ui/react';
 
 const Header = () => {
+  const { user, changeUser } = useContext(UserContext);
+  const [userData, setUserData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios.get('/users');
+      setUserData(result.data.users);
+    };
+    fetchData();
+  }, []);
   return (
     <Flex>
       <Box flex="1" p={4}>
@@ -19,7 +30,7 @@ const Header = () => {
           Kitchin
         </Heading>
         <Text fontSize="2xl" color="#999">
-          Kitchen Management Software
+          Welcome, {user.name}
         </Text>
       </Box>
       <Box p={4}>
@@ -34,26 +45,23 @@ const Header = () => {
             Switch User
           </MenuButton>
           <MenuList>
-            <MenuItem minH="48px">
-              <Image
-                boxSize="2rem"
-                borderRadius="full"
-                src="https://placekitten.com/100/100"
-                alt="Fluffybuns the destroyer"
-                mr="12px"
-              />
-              <span>Fluffybuns the Destroyer</span>
-            </MenuItem>
-            <MenuItem minH="40px">
-              <Image
-                boxSize="2rem"
-                borderRadius="full"
-                src="https://placekitten.com/120/120"
-                alt="Simon the pensive"
-                mr="12px"
-              />
-              <span>Simon the pensive</span>
-            </MenuItem>
+            {userData &&
+              userData.map((user, idx) => (
+                <MenuItem
+                  onClick={() => changeUser(user)}
+                  key={idx}
+                  minH="48px"
+                >
+                  <Image
+                    boxSize="2rem"
+                    borderRadius="full"
+                    src={`https://i.pravatar.cc/150?u=${user.fullName}+${user.username}`}
+                    alt={user.fullName}
+                    mr="12px"
+                  />
+                  <span>{user.fullName}</span>
+                </MenuItem>
+              ))}
           </MenuList>
         </Menu>
       </Box>
